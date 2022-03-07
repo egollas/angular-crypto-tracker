@@ -1,0 +1,62 @@
+<div class="container">
+  <div class="row justify-content-md-center">
+    <div class="col col-lg-3">
+      <form #coinForm="ngForm">
+        <div class="input-group mb-3">
+          <input
+            type="number"
+            class="form-control"
+            placeholder="0.0"
+            [(ngModel)]="newCoin.amount"
+            name="amount"
+            id="amount"
+          />
+          <select
+            class="form-select"
+            [(ngModel)]="newCoin.currency"
+            name="amount"
+            id="amount"
+          >
+            <option selected>-</option>
+            <option
+              [value]="currency"
+              *ngFor="let currency of allowedCurrencies"
+            >
+              {{ currency }}
+            </option>
+          </select>
+          <button class="btn btn-primary" type="button" (click)="saveCoin()">
+            Add
+          </button>
+        </div>
+      </form>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Currency</th>
+            <th scope="col">Amount</th>
+            <th scope="col">USD</th>
+            <th scope="col">Remove</th>
+          </tr>
+        </thead>
+        <tbody *ngIf="wallet | async as w">
+          <tr *ngFor="let coin of w.coins">
+            <th scope="row">{{ coin.currency }}</th>
+            <td>{{ coin.amount }}</td>
+            <td></td>
+            <td>
+              <span
+                (click)="removeCoin(coin.currency)"
+                style="cursor: pointer"
+                title="Remove"
+              >
+                ❌
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
