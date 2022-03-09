@@ -13,9 +13,9 @@ const newState = (state: any, newData: any) => {
   return Object.assign({}, state, newData);
 };
 
-const incrementCoin = (coins: Coin[], newCoin: Coin) => {
+const incrementCoin = (state: any, newCoin: Coin) => {
   let previousAmount = 0;
-  const newCoins = coins.filter((coin) => {
+  const newCoins = state.coins.filter((coin: Coin) => {
     if (coin.currency == newCoin.currency) {
       previousAmount = coin.amount;
       return false;
@@ -23,15 +23,18 @@ const incrementCoin = (coins: Coin[], newCoin: Coin) => {
       return true;
     }
   });
+  const newAmount = newCoin.amount + previousAmount;
+  const curentUsdValue = state.cryptos[newCoin.currency].USD;
   newCoins.push({
     currency: newCoin.currency,
-    amount: newCoin.amount + previousAmount,
+    amount: newAmount,
+    amount_usd: newAmount * curentUsdValue,
   });
   return newCoins;
 };
 
-const removeCoin = (coins: Coin[], selectedCoin: Coin) => {
-  return coins.filter((v) => v.currency !== selectedCoin.currency);
+const removeCoin = (coins: Coin[], currency: string) => {
+  return coins.filter((v) => v.currency !== currency);
 };
 
 export function walletReducer(state: Wallet = defaultState, action: any) {
@@ -44,7 +47,7 @@ export function walletReducer(state: Wallet = defaultState, action: any) {
 
     case WalletActions.ADD_COIN:
       modifiedState = {
-        coins: incrementCoin(state.coins, action.coin),
+        coins: incrementCoin(state, action.coin),
       };
       LocalStorageService.setInfo(modifiedState);
       return newState(state, modifiedState);
@@ -54,6 +57,20 @@ export function walletReducer(state: Wallet = defaultState, action: any) {
         coins: removeCoin(state.coins, action.currency),
       };
       LocalStorageService.setInfo(modifiedState);
+      return newState(state, modifiedState);
+
+    case WalletActions.UPDATE_COINS_USD:
+      modifiedState = {
+        cryptos: action.cryptoValues,
+        coins: state.coins.map((coin) => {
+          const curentUsdValue = action.cryptoValues[coin.currency].USD;
+          return {
+            amount: coin.amount,
+            currency: coin.currency,
+            amount_usd: coin.amount * curentUsdValue,
+          } as Coin;
+        }),
+      };
       return newState(state, modifiedState);
 
     default:

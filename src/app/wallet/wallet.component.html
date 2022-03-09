@@ -44,7 +44,7 @@
           <tr *ngFor="let coin of w.coins">
             <th scope="row">{{ coin.currency }}</th>
             <td>{{ coin.amount }}</td>
-            <td></td>
+            <td>{{ coin.amount_usd }}</td>
             <td>
               <span
                 (click)="removeCoin(coin.currency)"

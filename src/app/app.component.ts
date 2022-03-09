@@ -1,5 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Wallet } from './models/Wallet';
 import { CryptoFetcherService } from './services/crypto-fetcher/crypto-fetcher.service';
+import * as WalletActions from './actions/wallet.action';
+
+interface AppState {
+  wallet: Wallet;
+}
 
 @Component({
   selector: 'app-root',
@@ -8,15 +15,25 @@ import { CryptoFetcherService } from './services/crypto-fetcher/crypto-fetcher.s
   providers: [CryptoFetcherService],
 })
 export class AppComponent implements OnInit {
-  constructor(private cryptoFetcherService: CryptoFetcherService) {}
+  constructor(
+    private cryptoFetcherService: CryptoFetcherService,
+    private store: Store<AppState>
+  ) {}
 
   ngOnInit(): void {
-    this.cryptoFetcherService
-      .fetchCryptoCurrencies()
-      .subscribe(this.processCryptoValues);
+    this.fetchCryptoValues();
+    setInterval(() => {
+      this.fetchCryptoValues();
+    }, 5000);
   }
 
-  processCryptoValues(data: any) {
-    console.log(data);
+  fetchCryptoValues() {
+    this.cryptoFetcherService.fetchCryptoCurrencies().subscribe((data) => {
+      this.processCryptoValues(this.store, data);
+    });
+  }
+
+  processCryptoValues(store: Store<AppState>, data: any) {
+    store.dispatch(new WalletActions.UpdateCoinsUsd(data));
   }
 }
